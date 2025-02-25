@@ -23,8 +23,8 @@ export function useDeckColumns() {
 
         // Default deck if nothing in storage
         return [{
-            name: 'deck1',
-            chatIds: ['1416592158', '7900509641', '1524971696', '7733426429'],
+            name: 'Deck 1',
+            chatIds: [],
         }];
     }
     const [decks, setDecks] = useState<Deck[]>(getInitialDeckData());

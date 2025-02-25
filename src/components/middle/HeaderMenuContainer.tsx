@@ -236,7 +236,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     onClose();
   });
 
-  const { removeChatFromDeck } = useDecks();
+  const { removeChatFromDeck, selectedDeck } = useDecks();
 
   const handleDelete = useLastCallback(() => {
     setIsMenuOpen(false);
@@ -646,7 +646,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
               destructive
               icon="delete"
               onClick={() => {
-                removeChatFromDeck("deck1", chatId);
+                removeChatFromDeck(selectedDeck, chatId);
               }}
             >
               Delete Column

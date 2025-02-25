@@ -108,6 +108,8 @@ import "./Main.scss";
 import { useDeckColumns } from "../left/main/hooks/useDeckColumns";
 import { useDecks } from "../left/main/contexts/DeckContext";
 import AddColumn from "../left/AddColumn";
+import Sidebar from "../left/Sidebar";
+import Button from "../ui/Button";
 
 export interface OwnProps {
   isMobile?: boolean;
@@ -280,6 +282,8 @@ const Main = ({
 
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
+  const deckRef = useRef<HTMLDivElement>(null);
+
   // eslint-disable-next-line no-null/no-null
   const leftColumnRef = useRef<HTMLDivElement>(null);
 
@@ -594,31 +598,41 @@ const Main = ({
 
   return (
     <div ref={containerRef} id="Main" className={className}>
-      <div>
-        <p>Menu</p>
-        <div>
-          {decks.map((_deck, j) => (
-            <div>{_deck.name}</div>
-          ))}
-        </div>
-      </div>
-      <div className="scrollable-deck">
-        {decks[0].chatIds.map((_chatId, i) => (
-          <MiddleColumn
-            key={i}
-            leftColumnRef={leftColumnRef}
-            isMobile={true}
-            chatId={_chatId}
-          />
-        ))}
+      <Sidebar deckRef={deckRef} />
 
-        <div
-          onClick={() => {
-            setIsAddColumnOpen(!isAddColumnOpen);
-          }}
-        >
-          Add Column
-        </div>
+      <div className="scrollable-deck" ref={deckRef}>
+        {decks
+          .find((_deck) => _deck.name == selectedDeck)!
+          .chatIds.map((_chatId, i) => (
+            <MiddleColumn
+              key={i}
+              leftColumnRef={leftColumnRef}
+              isMobile={true}
+              chatId={_chatId}
+            />
+          ))}
+
+        {!isAddColumnOpen && (
+          <div className="add-column-wrapper">
+            <Button
+              onClick={() => {
+                setIsAddColumnOpen(!isAddColumnOpen);
+                setTimeout(() => {
+                  deckRef.current?.scrollTo({
+                    left:
+                      decks.find((_deck) => _deck.name == selectedDeck)!.chatIds
+                        .length *
+                        360 +
+                      360, //change this to the width of each column
+                    behavior: "smooth",
+                  });
+                }, 300);
+              }}
+            >
+              Add Column
+            </Button>
+          </div>
+        )}
 
         {isAddColumnOpen && <AddColumn ref={leftColumnRef} />}
 

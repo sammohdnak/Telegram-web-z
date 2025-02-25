@@ -158,11 +158,11 @@ const ChatResults: FC<OwnProps & StateProps> = ({
     [openChat, currentUserId, isMobile, addRecentlyFoundChatId, onReset]
   );
 
-  const { addChatToDeck } = useDecks();
+  const { addChatToDeck, selectedDeck } = useDecks();
 
   const handlePickerItemClick = useCallback(
     (id: string) => {
-      addChatToDeck("deck1", id);
+      addChatToDeck(selectedDeck, id);
       // setGlobalSearchChatId({ id });
     },
     [setGlobalSearchChatId]

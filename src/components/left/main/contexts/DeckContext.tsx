@@ -28,7 +28,7 @@ const defaultContext: DeckContextType = {
   removeDeck: () => {},
   addChatToDeck: () => {},
   removeChatFromDeck: () => {},
-  selectedDeck: "",
+  selectedDeck: "Deck 1",
   setSelectedDeck: () => {},
   isAddColumnOpen: false,
   setIsAddColumnOpen: () => {},

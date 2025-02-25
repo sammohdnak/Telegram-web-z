@@ -223,9 +223,9 @@ const Chat: FC<OwnProps & StateProps> = ({
 
   const getIsForumPanelClosed = useSelectorSignal(selectIsForumPanelClosed);
 
-  const { addChatToDeck } = useDecks();
+  const { addChatToDeck, selectedDeck } = useDecks();
   const handleClick = useLastCallback(() => {
-    addChatToDeck("deck1", chat?.id!);
+    addChatToDeck(selectedDeck, chat?.id!);
 
     return;
     const noForumTopicPanel = isMobile && isForumAsMessages;
