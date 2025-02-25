@@ -4,7 +4,9 @@
   height: 100%;
   position: relative;
   z-index: 1;
-  min-width: 0;
+  // width: 320px;
+  width: 360px;
+
 
   @media (max-width: 600px) {
     overflow: hidden;
@@ -175,7 +177,7 @@
     }
 
     @media (min-width: 1276px) {
-      width: calc(100% - var(--right-column-width));
+      // width: calc(100% - var(--right-column-width));
 
       #Main.right-column-open & {
         transform: translate3d(calc(var(--right-column-width) / -2), 0, 0);

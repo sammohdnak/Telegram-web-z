@@ -1,6 +1,6 @@
-import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useEffect, useMemo } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../global';
+import type { FC } from "../../../lib/teact/teact";
+import React, { memo, useEffect, useMemo } from "../../../lib/teact/teact";
+import { getActions, withGlobal } from "../../../global";
 
 import type {
   ApiChat,
@@ -13,11 +13,11 @@ import type {
   ApiTypingStatus,
   ApiUser,
   ApiUserStatus,
-} from '../../../api/types';
-import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
-import type { ChatAnimationTypes } from './hooks';
-import { MAIN_THREAD_ID } from '../../../api/types';
-import { StoryViewerOrigin } from '../../../types';
+} from "../../../api/types";
+import type { ObserveFn } from "../../../hooks/useIntersectionObserver";
+import type { ChatAnimationTypes } from "./hooks";
+import { MAIN_THREAD_ID } from "../../../api/types";
+import { StoryViewerOrigin } from "../../../types";
 
 import {
   getMessageAction,
@@ -25,8 +25,8 @@ import {
   isUserId,
   isUserOnline,
   selectIsChatMuted,
-} from '../../../global/helpers';
-import { getMessageReplyInfo } from '../../../global/helpers/replies';
+} from "../../../global/helpers";
+import { getMessageReplyInfo } from "../../../global/helpers/replies";
 import {
   selectCanAnimateInterface,
   selectChat,
@@ -49,34 +49,35 @@ import {
   selectTopicsInfo,
   selectUser,
   selectUserStatus,
-} from '../../../global/selectors';
-import buildClassName from '../../../util/buildClassName';
-import { createLocationHash } from '../../../util/routing';
-import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../util/windowEnvironment';
+} from "../../../global/selectors";
+import buildClassName from "../../../util/buildClassName";
+import { createLocationHash } from "../../../util/routing";
+import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from "../../../util/windowEnvironment";
 
-import useSelectorSignal from '../../../hooks/data/useSelectorSignal';
-import useAppLayout from '../../../hooks/useAppLayout';
-import useChatContextActions from '../../../hooks/useChatContextActions';
-import useEnsureMessage from '../../../hooks/useEnsureMessage';
-import useFlag from '../../../hooks/useFlag';
-import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
-import useLastCallback from '../../../hooks/useLastCallback';
-import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
-import useChatListEntry from './hooks/useChatListEntry';
+import useSelectorSignal from "../../../hooks/data/useSelectorSignal";
+import useAppLayout from "../../../hooks/useAppLayout";
+import useChatContextActions from "../../../hooks/useChatContextActions";
+import useEnsureMessage from "../../../hooks/useEnsureMessage";
+import useFlag from "../../../hooks/useFlag";
+import { useIsIntersecting } from "../../../hooks/useIntersectionObserver";
+import useLastCallback from "../../../hooks/useLastCallback";
+import useShowTransitionDeprecated from "../../../hooks/useShowTransitionDeprecated";
+import useChatListEntry from "./hooks/useChatListEntry";
 
-import Avatar from '../../common/Avatar';
-import DeleteChatModal from '../../common/DeleteChatModal';
-import FullNameTitle from '../../common/FullNameTitle';
-import Icon from '../../common/icons/Icon';
-import StarIcon from '../../common/icons/StarIcon';
-import LastMessageMeta from '../../common/LastMessageMeta';
-import ListItem from '../../ui/ListItem';
-import ChatFolderModal from '../ChatFolderModal.async';
-import MuteChatModal from '../MuteChatModal.async';
-import ChatBadge from './ChatBadge';
-import ChatCallStatus from './ChatCallStatus';
+import Avatar from "../../common/Avatar";
+import DeleteChatModal from "../../common/DeleteChatModal";
+import FullNameTitle from "../../common/FullNameTitle";
+import Icon from "../../common/icons/Icon";
+import StarIcon from "../../common/icons/StarIcon";
+import LastMessageMeta from "../../common/LastMessageMeta";
+import ListItem from "../../ui/ListItem";
+import ChatFolderModal from "../ChatFolderModal.async";
+import MuteChatModal from "../MuteChatModal.async";
+import ChatBadge from "./ChatBadge";
+import ChatCallStatus from "./ChatCallStatus";
 
-import './Chat.scss';
+import "./Chat.scss";
+import { useDecks } from "./contexts/DeckContext";
 
 type OwnProps = {
   chatId: string;
@@ -176,14 +177,28 @@ const Chat: FC<OwnProps & StateProps> = ({
   const { isMobile } = useAppLayout();
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag();
   const [isMuteModalOpen, openMuteModal, closeMuteModal] = useFlag();
-  const [isChatFolderModalOpen, openChatFolderModal, closeChatFolderModal] = useFlag();
-  const [shouldRenderDeleteModal, markRenderDeleteModal, unmarkRenderDeleteModal] = useFlag();
-  const [shouldRenderMuteModal, markRenderMuteModal, unmarkRenderMuteModal] = useFlag();
-  const [shouldRenderChatFolderModal, markRenderChatFolderModal, unmarkRenderChatFolderModal] = useFlag();
+  const [isChatFolderModalOpen, openChatFolderModal, closeChatFolderModal] =
+    useFlag();
+  const [
+    shouldRenderDeleteModal,
+    markRenderDeleteModal,
+    unmarkRenderDeleteModal,
+  ] = useFlag();
+  const [shouldRenderMuteModal, markRenderMuteModal, unmarkRenderMuteModal] =
+    useFlag();
+  const [
+    shouldRenderChatFolderModal,
+    markRenderChatFolderModal,
+    unmarkRenderChatFolderModal,
+  ] = useFlag();
 
   const { isForum, isForumAsMessages } = chat || {};
 
-  useEnsureMessage(isSavedDialog ? currentUserId : chatId, lastMessageId, lastMessage);
+  useEnsureMessage(
+    isSavedDialog ? currentUserId : chatId,
+    lastMessageId,
+    lastMessage
+  );
 
   const { renderSubtitle, ref } = useChatListEntry({
     chat,
@@ -208,7 +223,11 @@ const Chat: FC<OwnProps & StateProps> = ({
 
   const getIsForumPanelClosed = useSelectorSignal(selectIsForumPanelClosed);
 
+  const { addChatToDeck } = useDecks();
   const handleClick = useLastCallback(() => {
+    addChatToDeck("deck1", chat?.id!);
+
+    return;
     const noForumTopicPanel = isMobile && isForumAsMessages;
 
     if (isMobile) {
@@ -224,7 +243,10 @@ const Chat: FC<OwnProps & StateProps> = ({
     }
 
     if (isSavedDialog) {
-      openSavedDialog({ chatId, noForumTopicPanel: true }, { forceOnHeavyAnimation: true });
+      openSavedDialog(
+        { chatId, noForumTopicPanel: true },
+        { forceOnHeavyAnimation: true }
+      );
 
       if (isMobile) {
         toggleChatInfo({ force: false });
@@ -246,7 +268,10 @@ const Chat: FC<OwnProps & StateProps> = ({
       }
     }
 
-    openChat({ id: chatId, noForumTopicPanel, shouldReplaceHistory: true }, { forceOnHeavyAnimation: true });
+    openChat(
+      { id: chatId, noForumTopicPanel, shouldReplaceHistory: true },
+      { forceOnHeavyAnimation: true }
+    );
 
     if (isSelected && canScrollDown) {
       focusLastMessage();
@@ -294,7 +319,10 @@ const Chat: FC<OwnProps & StateProps> = ({
     isPreview,
   });
 
-  const isIntersecting = useIsIntersecting(ref, chat ? observeIntersection : undefined);
+  const isIntersecting = useIsIntersecting(
+    ref,
+    chat ? observeIntersection : undefined
+  );
 
   // Load the forum topics to display unread count badge
   useEffect(() => {
@@ -304,16 +332,17 @@ const Chat: FC<OwnProps & StateProps> = ({
   }, [chatId, listedTopicIds, isSynced, isForum, isIntersecting]);
 
   const isOnline = user && userStatus && isUserOnline(user, userStatus);
-  const { hasShownClass: isAvatarOnlineShown } = useShowTransitionDeprecated(isOnline);
+  const { hasShownClass: isAvatarOnlineShown } =
+    useShowTransitionDeprecated(isOnline);
 
   const href = useMemo(() => {
     if (!IS_OPEN_IN_NEW_TAB_SUPPORTED) return undefined;
 
     if (isSavedDialog) {
-      return `#${createLocationHash(currentUserId, 'thread', chatId)}`;
+      return `#${createLocationHash(currentUserId, "thread", chatId)}`;
     }
 
-    return `#${createLocationHash(chatId, 'thread', MAIN_THREAD_ID)}`;
+    return `#${createLocationHash(chatId, "thread", MAIN_THREAD_ID)}`;
   }, [chatId, currentUserId, isSavedDialog]);
 
   if (!chat) {
@@ -323,13 +352,13 @@ const Chat: FC<OwnProps & StateProps> = ({
   const peer = user || chat;
 
   const chatClassName = buildClassName(
-    'Chat chat-item-clickable',
-    isUserId(chatId) ? 'private' : 'group',
-    isForum && 'forum',
-    isSelected && 'selected',
-    isSelectedForum && 'selected-forum',
-    isPreview && 'standalone',
-    className,
+    "Chat chat-item-clickable",
+    isUserId(chatId) ? "private" : "group",
+    isForum && "forum",
+    isSelected && "selected",
+    isSelectedForum && "selected-forum",
+    isPreview && "standalone",
+    className
   );
 
   return (
@@ -344,12 +373,12 @@ const Chat: FC<OwnProps & StateProps> = ({
       onDragEnter={handleDragEnter}
       withPortalForMenu
     >
-      <div className={buildClassName('status', 'status-clickable')}>
+      <div className={buildClassName("status", "status-clickable")}>
         <Avatar
           peer={peer}
           isSavedMessages={user?.isSelf}
           isSavedDialog={isSavedDialog}
-          size={isPreview ? 'medium' : 'large'}
+          size={isPreview ? "medium" : "large"}
           withStory={!user?.isSelf}
           withStoryGap={isAvatarOnlineShown || Boolean(chat.subscriptionUntil)}
           storyViewerOrigin={StoryViewerOrigin.ChatList}
@@ -357,10 +386,18 @@ const Chat: FC<OwnProps & StateProps> = ({
         />
         <div className="avatar-badge-wrapper">
           <div
-            className={buildClassName('avatar-online', 'avatar-badge', isAvatarOnlineShown && 'avatar-online-shown')}
+            className={buildClassName(
+              "avatar-online",
+              "avatar-badge",
+              isAvatarOnlineShown && "avatar-online-shown"
+            )}
           />
           {!isAvatarOnlineShown && Boolean(chat.subscriptionUntil) && (
-            <StarIcon type="gold" className="avatar-badge avatar-subscription" size="adaptive" />
+            <StarIcon
+              type="gold"
+              className="avatar-badge avatar-subscription"
+              size="adaptive"
+            />
           )}
           <ChatBadge
             chat={chat}
@@ -372,7 +409,11 @@ const Chat: FC<OwnProps & StateProps> = ({
           />
         </div>
         {chat.isCallActive && chat.isCallNotEmpty && (
-          <ChatCallStatus isMobile={isMobile} isSelected={isSelected} isActive={withInterfaceAnimations} />
+          <ChatCallStatus
+            isMobile={isMobile}
+            isSelected={isSelected}
+            isActive={withInterfaceAnimations}
+          />
         )}
       </div>
       <div className="info">
@@ -389,7 +430,9 @@ const Chat: FC<OwnProps & StateProps> = ({
           {lastMessage && (
             <LastMessageMeta
               message={lastMessage}
-              outgoingStatus={!isSavedDialog ? lastMessageOutgoingStatus : undefined}
+              outgoingStatus={
+                !isSavedDialog ? lastMessageOutgoingStatus : undefined
+              }
               draftDate={draft?.date}
             />
           )}
@@ -438,81 +481,126 @@ const Chat: FC<OwnProps & StateProps> = ({
   );
 };
 
-export default memo(withGlobal<OwnProps>(
-  (global, {
-    chatId, isSavedDialog, isPreview, previewMessageId,
-  }): StateProps => {
-    const chat = selectChat(global, chatId);
-    const user = selectUser(global, chatId);
-    if (!chat) {
+export default memo(
+  withGlobal<OwnProps>(
+    (
+      global,
+      { chatId, isSavedDialog, isPreview, previewMessageId }
+    ): StateProps => {
+      const chat = selectChat(global, chatId);
+      const user = selectUser(global, chatId);
+      if (!chat) {
+        return {
+          currentUserId: global.currentUserId!,
+        };
+      }
+
+      const lastMessageId =
+        previewMessageId ||
+        selectChatLastMessageId(
+          global,
+          chatId,
+          isSavedDialog ? "saved" : "all"
+        );
+      const lastMessage = previewMessageId
+        ? selectChatMessage(global, chatId, previewMessageId)
+        : selectChatLastMessage(
+            global,
+            chatId,
+            isSavedDialog ? "saved" : "all"
+          );
+      const { isOutgoing, forwardInfo } = lastMessage || {};
+      const savedDialogSender =
+        isSavedDialog && forwardInfo?.fromId
+          ? selectPeer(global, forwardInfo.fromId)
+          : undefined;
+      const messageSender = lastMessage
+        ? selectSender(global, lastMessage)
+        : undefined;
+      const lastMessageSender = savedDialogSender || messageSender;
+      const replyToMessageId =
+        lastMessage && getMessageReplyInfo(lastMessage)?.replyToMsgId;
+      const lastMessageAction = lastMessage
+        ? getMessageAction(lastMessage)
+        : undefined;
+      const actionTargetMessage =
+        lastMessageAction && replyToMessageId
+          ? selectChatMessage(global, chat.id, replyToMessageId)
+          : undefined;
+      const {
+        targetUserIds: actionTargetUserIds,
+        targetChatId: actionTargetChatId,
+      } = lastMessageAction || {};
+
+      const {
+        chatId: currentChatId,
+        threadId: currentThreadId,
+        type: messageListType,
+      } = selectCurrentMessageList(global) || {};
+      const isSelected =
+        !isPreview &&
+        chatId === currentChatId &&
+        (isSavedDialog
+          ? chatId === currentThreadId
+          : currentThreadId === MAIN_THREAD_ID);
+      const isSelectedForum =
+        (chat.isForum && chatId === currentChatId) ||
+        chatId === selectTabState(global).forumPanelChatId;
+
+      const userStatus = selectUserStatus(global, chatId);
+      const lastMessageTopic =
+        lastMessage && selectTopicFromMessage(global, lastMessage);
+
+      const typingStatus = selectThreadParam(
+        global,
+        chatId,
+        MAIN_THREAD_ID,
+        "typingStatus"
+      );
+
+      const topicsInfo = selectTopicsInfo(global, chatId);
+
+      const storyData = lastMessage?.content.storyData;
+      const lastMessageStory =
+        storyData && selectPeerStory(global, storyData.peerId, storyData.id);
+
       return {
+        chat,
+        isMuted: selectIsChatMuted(
+          chat,
+          selectNotifySettings(global),
+          selectNotifyExceptions(global)
+        ),
+        lastMessageSender,
+        actionTargetUserIds,
+        actionTargetChatId,
+        actionTargetMessage,
+        draft: selectDraft(global, chatId, MAIN_THREAD_ID),
+        isSelected,
+        isSelectedForum,
+        isForumPanelOpen: selectIsForumPanelOpen(global),
+        canScrollDown: isSelected && messageListType === "thread",
+        canChangeFolder: (global.chatFolders.orderedIds?.length || 0) > 1,
+        ...(isOutgoing &&
+          lastMessage && {
+            lastMessageOutgoingStatus: selectOutgoingStatus(
+              global,
+              lastMessage
+            ),
+          }),
+        user,
+        userStatus,
+        lastMessageTopic,
+        typingStatus,
+        withInterfaceAnimations: selectCanAnimateInterface(global),
+        lastMessage,
+        lastMessageId,
         currentUserId: global.currentUserId!,
+        listedTopicIds: topicsInfo?.listedTopicIds,
+        topics: topicsInfo?.topicsById,
+        isSynced: global.isSynced,
+        lastMessageStory,
       };
     }
-
-    const lastMessageId = previewMessageId || selectChatLastMessageId(global, chatId, isSavedDialog ? 'saved' : 'all');
-    const lastMessage = previewMessageId
-      ? selectChatMessage(global, chatId, previewMessageId)
-      : selectChatLastMessage(global, chatId, isSavedDialog ? 'saved' : 'all');
-    const { isOutgoing, forwardInfo } = lastMessage || {};
-    const savedDialogSender = isSavedDialog && forwardInfo?.fromId ? selectPeer(global, forwardInfo.fromId) : undefined;
-    const messageSender = lastMessage ? selectSender(global, lastMessage) : undefined;
-    const lastMessageSender = savedDialogSender || messageSender;
-    const replyToMessageId = lastMessage && getMessageReplyInfo(lastMessage)?.replyToMsgId;
-    const lastMessageAction = lastMessage ? getMessageAction(lastMessage) : undefined;
-    const actionTargetMessage = lastMessageAction && replyToMessageId
-      ? selectChatMessage(global, chat.id, replyToMessageId)
-      : undefined;
-    const { targetUserIds: actionTargetUserIds, targetChatId: actionTargetChatId } = lastMessageAction || {};
-
-    const {
-      chatId: currentChatId,
-      threadId: currentThreadId,
-      type: messageListType,
-    } = selectCurrentMessageList(global) || {};
-    const isSelected = !isPreview && chatId === currentChatId && (isSavedDialog
-      ? chatId === currentThreadId : currentThreadId === MAIN_THREAD_ID);
-    const isSelectedForum = (chat.isForum && chatId === currentChatId)
-      || chatId === selectTabState(global).forumPanelChatId;
-
-    const userStatus = selectUserStatus(global, chatId);
-    const lastMessageTopic = lastMessage && selectTopicFromMessage(global, lastMessage);
-
-    const typingStatus = selectThreadParam(global, chatId, MAIN_THREAD_ID, 'typingStatus');
-
-    const topicsInfo = selectTopicsInfo(global, chatId);
-
-    const storyData = lastMessage?.content.storyData;
-    const lastMessageStory = storyData && selectPeerStory(global, storyData.peerId, storyData.id);
-
-    return {
-      chat,
-      isMuted: selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global)),
-      lastMessageSender,
-      actionTargetUserIds,
-      actionTargetChatId,
-      actionTargetMessage,
-      draft: selectDraft(global, chatId, MAIN_THREAD_ID),
-      isSelected,
-      isSelectedForum,
-      isForumPanelOpen: selectIsForumPanelOpen(global),
-      canScrollDown: isSelected && messageListType === 'thread',
-      canChangeFolder: (global.chatFolders.orderedIds?.length || 0) > 1,
-      ...(isOutgoing && lastMessage && {
-        lastMessageOutgoingStatus: selectOutgoingStatus(global, lastMessage),
-      }),
-      user,
-      userStatus,
-      lastMessageTopic,
-      typingStatus,
-      withInterfaceAnimations: selectCanAnimateInterface(global),
-      lastMessage,
-      lastMessageId,
-      currentUserId: global.currentUserId!,
-      listedTopicIds: topicsInfo?.listedTopicIds,
-      topics: topicsInfo?.topicsById,
-      isSynced: global.isSynced,
-      lastMessageStory,
-    };
-  },
-)(Chat));
+  )(Chat)
+);

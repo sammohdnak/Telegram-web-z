@@ -1,52 +1,63 @@
-import type { FC } from '../../../lib/teact/teact';
+import type { FC } from "../../../lib/teact/teact";
 import React, {
-  memo, useCallback, useEffect,
-  useMemo, useRef, useState,
-} from '../../../lib/teact/teact';
-import { getActions, getGlobal, withGlobal } from '../../../global';
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "../../../lib/teact/teact";
+import { getActions, getGlobal, withGlobal } from "../../../global";
 
-import type { ApiMessage, ApiMessageSearchContext } from '../../../api/types';
-import { LoadMoreDirection } from '../../../types';
+import type { ApiMessage, ApiMessageSearchContext } from "../../../api/types";
+import { LoadMoreDirection } from "../../../types";
 
-import { ALL_FOLDER_ID, GLOBAL_SUGGESTED_CHANNELS_ID } from '../../../config';
+import { ALL_FOLDER_ID, GLOBAL_SUGGESTED_CHANNELS_ID } from "../../../config";
 import {
   filterChatsByName,
   filterUsersByName,
   isChatChannel,
-} from '../../../global/helpers';
-import { selectSimilarChannelIds, selectTabState } from '../../../global/selectors';
-import buildClassName from '../../../util/buildClassName';
-import { getOrderedIds } from '../../../util/folderManager';
-import { unique } from '../../../util/iteratees';
-import { parseSearchResultKey, type SearchResultKey } from '../../../util/keys/searchResultKey';
-import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
-import { throttle } from '../../../util/schedulers';
-import { renderMessageSummary } from '../../common/helpers/renderMessageText';
-import sortChatIds from '../../common/helpers/sortChatIds';
+} from "../../../global/helpers";
+import {
+  selectSimilarChannelIds,
+  selectTabState,
+} from "../../../global/selectors";
+import buildClassName from "../../../util/buildClassName";
+import { getOrderedIds } from "../../../util/folderManager";
+import { unique } from "../../../util/iteratees";
+import {
+  parseSearchResultKey,
+  type SearchResultKey,
+} from "../../../util/keys/searchResultKey";
+import { MEMO_EMPTY_ARRAY } from "../../../util/memo";
+import { throttle } from "../../../util/schedulers";
+import { renderMessageSummary } from "../../common/helpers/renderMessageText";
+import sortChatIds from "../../common/helpers/sortChatIds";
 
-import useAppLayout from '../../../hooks/useAppLayout';
-import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
-import useEffectOnce from '../../../hooks/useEffectOnce';
-import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
-import useLang from '../../../hooks/useLang';
-import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
+import useAppLayout from "../../../hooks/useAppLayout";
+import useContextMenuHandlers from "../../../hooks/useContextMenuHandlers";
+import useEffectOnce from "../../../hooks/useEffectOnce";
+import useHorizontalScroll from "../../../hooks/useHorizontalScroll";
+import useLang from "../../../hooks/useLang";
+import useLastCallback from "../../../hooks/useLastCallback";
+import useOldLang from "../../../hooks/useOldLang";
 
-import Icon from '../../common/icons/Icon';
-import NothingFound from '../../common/NothingFound';
-import PeerChip from '../../common/PeerChip';
-import InfiniteScroll from '../../ui/InfiniteScroll';
-import Link from '../../ui/Link';
-import Loading from '../../ui/Loading';
-import Menu from '../../ui/Menu';
-import MenuItem from '../../ui/MenuItem';
-import Transition from '../../ui/Transition';
-import ChatMessage from './ChatMessage';
-import DateSuggest from './DateSuggest';
-import LeftSearchResultChat from './LeftSearchResultChat';
-import RecentContacts from './RecentContacts';
+import Icon from "../../common/icons/Icon";
+import NothingFound from "../../common/NothingFound";
+import PeerChip from "../../common/PeerChip";
+import InfiniteScroll from "../../ui/InfiniteScroll";
+import Link from "../../ui/Link";
+import Loading from "../../ui/Loading";
+import Menu from "../../ui/Menu";
+import MenuItem from "../../ui/MenuItem";
+import Transition from "../../ui/Transition";
+import ChatMessage from "./ChatMessage";
+import DateSuggest from "./DateSuggest";
+import LeftSearchResultChat from "./LeftSearchResultChat";
+import RecentContacts from "./RecentContacts";
 
-import './ChatResults.scss';
+import "./ChatResults.scss";
+import { useDecks } from "../main/contexts/DeckContext";
 
 export type OwnProps = {
   searchQuery?: string;
@@ -90,8 +101,11 @@ const ChatResults: FC<OwnProps & StateProps> = ({
   onSearchDateSelect,
 }) => {
   const {
-    openChat, addRecentlyFoundChatId, searchMessagesGlobal,
-    setGlobalSearchChatId, loadChannelRecommendations,
+    openChat,
+    addRecentlyFoundChatId,
+    searchMessagesGlobal,
+    setGlobalSearchChatId,
+    loadChannelRecommendations,
   } = getActions();
 
   // eslint-disable-next-line no-null/no-null
@@ -101,9 +115,12 @@ const ChatResults: FC<OwnProps & StateProps> = ({
   const lang = useLang();
 
   const { isMobile } = useAppLayout();
-  const [shouldShowMoreLocal, setShouldShowMoreLocal] = useState<boolean>(false);
-  const [shouldShowMoreGlobal, setShouldShowMoreGlobal] = useState<boolean>(false);
-  const [searchContext, setSearchContext] = useState<ApiMessageSearchContext>('all');
+  const [shouldShowMoreLocal, setShouldShowMoreLocal] =
+    useState<boolean>(false);
+  const [shouldShowMoreGlobal, setShouldShowMoreGlobal] =
+    useState<boolean>(false);
+  const [searchContext, setSearchContext] =
+    useState<ApiMessageSearchContext>("all");
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
 
@@ -111,17 +128,20 @@ const ChatResults: FC<OwnProps & StateProps> = ({
     if (isChannelList) loadChannelRecommendations({});
   });
 
-  const handleLoadMore = useCallback(({ direction }: { direction: LoadMoreDirection }) => {
-    if (direction === LoadMoreDirection.Backwards) {
-      runThrottled(() => {
-        searchMessagesGlobal({
-          type: isChannelList ? 'channels' : 'text',
-          context: searchContext,
+  const handleLoadMore = useCallback(
+    ({ direction }: { direction: LoadMoreDirection }) => {
+      if (direction === LoadMoreDirection.Backwards) {
+        runThrottled(() => {
+          searchMessagesGlobal({
+            type: isChannelList ? "channels" : "text",
+            context: searchContext,
+          });
         });
-      });
-    }
-  // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps -- `searchQuery` is required to prevent infinite message loading
-  }, [searchQuery, searchContext]);
+      }
+      // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps -- `searchQuery` is required to prevent infinite message loading
+    },
+    [searchQuery, searchContext]
+  );
 
   const handleChatClick = useCallback(
     (id: string) => {
@@ -135,34 +155,47 @@ const ChatResults: FC<OwnProps & StateProps> = ({
         onReset();
       }
     },
-    [openChat, currentUserId, isMobile, addRecentlyFoundChatId, onReset],
+    [openChat, currentUserId, isMobile, addRecentlyFoundChatId, onReset]
   );
 
-  const handlePickerItemClick = useCallback((id: string) => {
-    setGlobalSearchChatId({ id });
-  }, [setGlobalSearchChatId]);
+  const { addChatToDeck } = useDecks();
+
+  const handlePickerItemClick = useCallback(
+    (id: string) => {
+      addChatToDeck("deck1", id);
+      // setGlobalSearchChatId({ id });
+    },
+    [setGlobalSearchChatId]
+  );
 
   function getSearchContextCaption(context: ApiMessageSearchContext) {
-    if (context === 'users') return lang('PrivateChatsSearchContext');
-    if (context === 'groups') return lang('GroupChatsSearchContext');
-    if (context === 'channels') return lang('ChannelsSearchContext');
-    return lang('AllChatsSearchContext');
+    if (context === "users") return lang("PrivateChatsSearchContext");
+    if (context === "groups") return lang("GroupChatsSearchContext");
+    if (context === "channels") return lang("ChannelsSearchContext");
+    return lang("AllChatsSearchContext");
   }
 
   const {
-    isContextMenuOpen, contextMenuAnchor, handleContextMenu,
-    handleContextMenuClose, handleContextMenuHide,
+    isContextMenuOpen,
+    contextMenuAnchor,
+    handleContextMenu,
+    handleContextMenuClose,
+    handleContextMenuHide,
   } = useContextMenuHandlers(ref);
 
   const getRootElement = useLastCallback(() => ref.current!);
-  const getMenuElement = useLastCallback(() => ref.current!.querySelector('.chatResultsContextMenu .bubble'));
-  const getTriggerElement = useLastCallback(() => ref.current!.querySelector('.menuTrigger'));
+  const getMenuElement = useLastCallback(() =>
+    ref.current!.querySelector(".chatResultsContextMenu .bubble")
+  );
+  const getTriggerElement = useLastCallback(() =>
+    ref.current!.querySelector(".menuTrigger")
+  );
 
   const handleClickContext = useLastCallback((e: React.MouseEvent): void => {
     handleContextMenu(e);
   });
 
-  const itemPlaceholderClass = buildClassName('icon', 'iconPlaceholder');
+  const itemPlaceholderClass = buildClassName("icon", "iconPlaceholder");
 
   function renderContextMenu() {
     return (
@@ -179,36 +212,52 @@ const ChatResults: FC<OwnProps & StateProps> = ({
       >
         <>
           <MenuItem
-            icon={searchContext === 'all' ? 'check' : undefined}
-            customIcon={searchContext !== 'all' ? <i className={itemPlaceholderClass} /> : undefined}
+            icon={searchContext === "all" ? "check" : undefined}
+            customIcon={
+              searchContext !== "all" ? (
+                <i className={itemPlaceholderClass} />
+              ) : undefined
+            }
             // eslint-disable-next-line react/jsx-no-bind
-            onClick={() => setSearchContext('all')}
+            onClick={() => setSearchContext("all")}
           >
-            {getSearchContextCaption('all')}
+            {getSearchContextCaption("all")}
           </MenuItem>
           <MenuItem
-            icon={searchContext === 'users' ? 'check' : undefined}
-            customIcon={searchContext !== 'users' ? <i className={itemPlaceholderClass} /> : undefined}
+            icon={searchContext === "users" ? "check" : undefined}
+            customIcon={
+              searchContext !== "users" ? (
+                <i className={itemPlaceholderClass} />
+              ) : undefined
+            }
             // eslint-disable-next-line react/jsx-no-bind
-            onClick={() => setSearchContext('users')}
+            onClick={() => setSearchContext("users")}
           >
-            {getSearchContextCaption('users')}
+            {getSearchContextCaption("users")}
           </MenuItem>
           <MenuItem
-            icon={searchContext === 'groups' ? 'check' : undefined}
-            customIcon={searchContext !== 'groups' ? <i className={itemPlaceholderClass} /> : undefined}
+            icon={searchContext === "groups" ? "check" : undefined}
+            customIcon={
+              searchContext !== "groups" ? (
+                <i className={itemPlaceholderClass} />
+              ) : undefined
+            }
             // eslint-disable-next-line react/jsx-no-bind
-            onClick={() => setSearchContext('groups')}
+            onClick={() => setSearchContext("groups")}
           >
-            {getSearchContextCaption('groups')}
+            {getSearchContextCaption("groups")}
           </MenuItem>
           <MenuItem
-            icon={searchContext === 'channels' ? 'check' : undefined}
-            customIcon={searchContext !== 'channels' ? <i className={itemPlaceholderClass} /> : undefined}
+            icon={searchContext === "channels" ? "check" : undefined}
+            customIcon={
+              searchContext !== "channels" ? (
+                <i className={itemPlaceholderClass} />
+              ) : undefined
+            }
             // eslint-disable-next-line react/jsx-no-bind
-            onClick={() => setSearchContext('channels')}
+            onClick={() => setSearchContext("channels")}
           >
-            {getSearchContextCaption('channels')}
+            {getSearchContextCaption("channels")}
           </MenuItem>
         </>
       </Menu>
@@ -216,7 +265,10 @@ const ChatResults: FC<OwnProps & StateProps> = ({
   }
 
   const localResults = useMemo(() => {
-    if (!isChannelList && (!searchQuery || (searchQuery.startsWith('@') && searchQuery.length < 2))) {
+    if (
+      !isChannelList &&
+      (!searchQuery || (searchQuery.startsWith("@") && searchQuery.length < 2))
+    ) {
       return MEMO_EMPTY_ARRAY;
     }
 
@@ -230,7 +282,13 @@ const ChatResults: FC<OwnProps & StateProps> = ({
       const chat = chatsById[id];
       return chat && isChatChannel(chat);
     });
-    const localChatIds = filterChatsByName(oldLang, filteredChatIds, chatsById, searchQuery, currentUserId);
+    const localChatIds = filterChatsByName(
+      oldLang,
+      filteredChatIds,
+      chatsById,
+      searchQuery,
+      currentUserId
+    );
 
     if (isChannelList) return localChatIds;
 
@@ -240,24 +298,44 @@ const ChatResults: FC<OwnProps & StateProps> = ({
     ];
 
     const localContactIds = filterUsersByName(
-      contactIdsWithMe, usersById, searchQuery, currentUserId, oldLang('SavedMessages'),
+      contactIdsWithMe,
+      usersById,
+      searchQuery,
+      currentUserId,
+      oldLang("SavedMessages")
     );
 
-    const localPeerIds = [
-      ...localContactIds,
-      ...localChatIds,
-    ];
+    const localPeerIds = [...localContactIds, ...localChatIds];
 
     return unique([
-      ...sortChatIds(localPeerIds, undefined, currentUserId ? [currentUserId] : undefined),
+      ...sortChatIds(
+        localPeerIds,
+        undefined,
+        currentUserId ? [currentUserId] : undefined
+      ),
       ...sortChatIds(accountPeerIds || []),
     ]);
-  }, [searchQuery, oldLang, currentUserId, contactIds, accountPeerIds, isChannelList]);
+  }, [
+    searchQuery,
+    oldLang,
+    currentUserId,
+    contactIds,
+    accountPeerIds,
+    isChannelList,
+  ]);
 
-  useHorizontalScroll(chatSelectionRef, !localResults.length || isChannelList, true);
+  useHorizontalScroll(
+    chatSelectionRef,
+    !localResults.length || isChannelList,
+    true
+  );
 
   const globalResults = useMemo(() => {
-    if (!searchQuery || searchQuery.length < MIN_QUERY_LENGTH_FOR_GLOBAL_SEARCH || !globalPeerIds) {
+    if (
+      !searchQuery ||
+      searchQuery.length < MIN_QUERY_LENGTH_FOR_GLOBAL_SEARCH ||
+      !globalPeerIds
+    ) {
       return MEMO_EMPTY_ARRAY;
     }
 
@@ -291,12 +369,18 @@ const ChatResults: FC<OwnProps & StateProps> = ({
         return globalMessagesByChatId?.[chatId]?.byId[messageId];
       })
       .filter(Boolean);
-  }, [searchQuery, searchDate, foundIds, isChannelList, globalMessagesByChatId]);
+  }, [
+    searchQuery,
+    searchDate,
+    foundIds,
+    isChannelList,
+    globalMessagesByChatId,
+  ]);
 
   useEffect(() => {
     if (!searchQuery) return;
     searchMessagesGlobal({
-      type: isChannelList ? 'channels' : 'text',
+      type: isChannelList ? "channels" : "text",
       context: searchContext,
       shouldResetResultsByType: true,
       shouldCheckFetchingMessagesStatus: true,
@@ -333,15 +417,22 @@ const ChatResults: FC<OwnProps & StateProps> = ({
 
   const actualFoundIds = foundMessages;
 
-  const nothingFound = searchContext === 'all' && fetchingStatus && !fetchingStatus.chats && !fetchingStatus.messages
-    && !localResults.length && !globalResults.length && !actualFoundIds.length;
+  const nothingFound =
+    searchContext === "all" &&
+    fetchingStatus &&
+    !fetchingStatus.chats &&
+    !fetchingStatus.messages &&
+    !localResults.length &&
+    !globalResults.length &&
+    !actualFoundIds.length;
   const isMessagesFetching = fetchingStatus?.messages;
 
   if (!searchQuery && !searchDate && !isChannelList) {
     return <RecentContacts onReset={onReset} />;
   }
 
-  const shouldRenderMessagesSection = searchContext === 'all' ? Boolean(actualFoundIds.length) : true;
+  const shouldRenderMessagesSection =
+    searchContext === "all" ? Boolean(actualFoundIds.length) : true;
 
   return (
     <InfiniteScroll
@@ -362,14 +453,14 @@ const ChatResults: FC<OwnProps & StateProps> = ({
       )}
       {nothingFound && (
         <NothingFound
-          text={oldLang('ChatList.Search.NoResults')}
-          description={oldLang('ChatList.Search.NoResultsDescription')}
+          text={oldLang("ChatList.Search.NoResults")}
+          description={oldLang("ChatList.Search.NoResultsDescription")}
         />
       )}
       {Boolean(localResults.length) && !isChannelList && (
         <div
           className="chat-selection no-scrollbar"
-          dir={oldLang.isRtl ? 'rtl' : undefined}
+          dir={oldLang.isRtl ? "rtl" : undefined}
           ref={chatSelectionRef}
         >
           {localResults.map((id) => (
@@ -384,13 +475,24 @@ const ChatResults: FC<OwnProps & StateProps> = ({
       )}
       {Boolean(localResults.length) && (
         <div className="search-section">
-          <h3 className="section-heading" dir={oldLang.isRtl ? 'auto' : undefined}>
+          <h3
+            className="section-heading"
+            dir={oldLang.isRtl ? "auto" : undefined}
+          >
             {localResults.length > LESS_LIST_ITEMS_AMOUNT && (
               <Link className="Link" onClick={handleClickShowMoreLocal}>
-                {oldLang(shouldShowMoreLocal ? 'ChatList.Search.ShowLess' : 'ChatList.Search.ShowMore')}
+                {oldLang(
+                  shouldShowMoreLocal
+                    ? "ChatList.Search.ShowLess"
+                    : "ChatList.Search.ShowMore"
+                )}
               </Link>
             )}
-            {oldLang(isChannelList ? 'SearchMyChannels' : 'DialogList.SearchSectionDialogs')}
+            {oldLang(
+              isChannelList
+                ? "SearchMyChannels"
+                : "DialogList.SearchSectionDialogs"
+            )}
           </h3>
           {localResults.map((id, index) => {
             if (!shouldShowMoreLocal && index >= LESS_LIST_ITEMS_AMOUNT) {
@@ -398,23 +500,27 @@ const ChatResults: FC<OwnProps & StateProps> = ({
             }
 
             return (
-              <LeftSearchResultChat
-                chatId={id}
-                onClick={handleChatClick}
-              />
+              <LeftSearchResultChat chatId={id} onClick={handleChatClick} />
             );
           })}
         </div>
       )}
       {Boolean(globalResults.length) && (
         <div className="search-section">
-          <h3 className="section-heading" dir={oldLang.isRtl ? 'auto' : undefined}>
+          <h3
+            className="section-heading"
+            dir={oldLang.isRtl ? "auto" : undefined}
+          >
             {globalResults.length > LESS_LIST_ITEMS_AMOUNT && (
               <Link className="Link" onClick={handleClickShowMoreGlobal}>
-                {oldLang(shouldShowMoreGlobal ? 'ChatList.Search.ShowLess' : 'ChatList.Search.ShowMore')}
+                {oldLang(
+                  shouldShowMoreGlobal
+                    ? "ChatList.Search.ShowLess"
+                    : "ChatList.Search.ShowMore"
+                )}
               </Link>
             )}
-            {oldLang('DialogList.SearchSectionGlobal')}
+            {oldLang("DialogList.SearchSectionGlobal")}
           </h3>
           {globalResults.map((id, index) => {
             if (!shouldShowMoreGlobal && index >= LESS_LIST_ITEMS_AMOUNT) {
@@ -433,8 +539,11 @@ const ChatResults: FC<OwnProps & StateProps> = ({
       )}
       {Boolean(suggestedChannelIds?.length) && !searchQuery && (
         <div className="search-section">
-          <h3 className="section-heading" dir={oldLang.isRtl ? 'auto' : undefined}>
-            {oldLang('SearchRecommendedChannels')}
+          <h3
+            className="section-heading"
+            dir={oldLang.isRtl ? "auto" : undefined}
+          >
+            {oldLang("SearchRecommendedChannels")}
           </h3>
           {suggestedChannelIds.map((id) => {
             return (
@@ -451,14 +560,24 @@ const ChatResults: FC<OwnProps & StateProps> = ({
         {renderContextMenu()}
         {shouldRenderMessagesSection && (
           <div className="search-section">
-            <h3 className="section-heading" dir={oldLang.isRtl ? 'auto' : undefined}>
+            <h3
+              className="section-heading"
+              dir={oldLang.isRtl ? "auto" : undefined}
+            >
               {!isChannelList && (
-                <Link className="Link menuTrigger dropDownLink" onClick={handleClickContext}>
-                  {lang('SearchContextCaption', {
-                    type: getSearchContextCaption(searchContext),
-                  }, {
-                    withNodes: true,
-                  })}
+                <Link
+                  className="Link menuTrigger dropDownLink"
+                  onClick={handleClickContext}
+                >
+                  {lang(
+                    "SearchContextCaption",
+                    {
+                      type: getSearchContextCaption(searchContext),
+                    },
+                    {
+                      withNodes: true,
+                    }
+                  )}
 
                   <Transition
                     name="fade"
@@ -467,12 +586,12 @@ const ChatResults: FC<OwnProps & StateProps> = ({
                     className="iconContainer"
                     slideClassName="iconContainerSlide"
                   >
-                    {isMessagesFetching && (<Loading />)}
+                    {isMessagesFetching && <Loading />}
                     {!isMessagesFetching && <Icon name="down" />}
                   </Transition>
                 </Link>
               )}
-              {oldLang('SearchMessages')}
+              {oldLang("SearchMessages")}
             </h3>
             {actualFoundIds.map(renderFoundMessage)}
           </div>
@@ -482,25 +601,24 @@ const ChatResults: FC<OwnProps & StateProps> = ({
   );
 };
 
-export default memo(withGlobal<OwnProps>(
-  (global, { isChannelList }): StateProps => {
+export default memo(
+  withGlobal<OwnProps>((global, { isChannelList }): StateProps => {
     const { userIds: contactIds } = global.contactList || {};
-    const {
-      currentUserId, messages,
-    } = global;
+    const { currentUserId, messages } = global;
 
     if (!contactIds) {
       return {};
     }
 
-    const {
-      fetchingStatus, globalResults, localResults, resultsByType,
-    } = selectTabState(global).globalSearch;
+    const { fetchingStatus, globalResults, localResults, resultsByType } =
+      selectTabState(global).globalSearch;
     const { peerIds: globalPeerIds } = globalResults || {};
     const { peerIds: accountPeerIds } = localResults || {};
     const { byChatId: globalMessagesByChatId } = messages;
-    const foundIds = resultsByType?.[isChannelList ? 'channels' : 'text']?.foundIds;
-    const { similarChannelIds } = selectSimilarChannelIds(global, GLOBAL_SUGGESTED_CHANNELS_ID) || {};
+    const foundIds =
+      resultsByType?.[isChannelList ? "channels" : "text"]?.foundIds;
+    const { similarChannelIds } =
+      selectSimilarChannelIds(global, GLOBAL_SUGGESTED_CHANNELS_ID) || {};
 
     return {
       currentUserId,
@@ -512,5 +630,5 @@ export default memo(withGlobal<OwnProps>(
       fetchingStatus,
       suggestedChannelIds: similarChannelIds,
     };
-  },
-)(ChatResults));
+  })(ChatResults)
+);

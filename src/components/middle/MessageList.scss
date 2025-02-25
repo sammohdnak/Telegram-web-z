@@ -517,9 +517,9 @@
     transform: translate3d(0, 0, 0);
     transition: transform var(--layer-transition);
 
-    .messages-container {
-      width: calc(100% - var(--right-column-width));
-    }
+    // .messages-container {
+    //   width: calc(100% - var(--right-column-width));
+    // }
 
     body.no-right-column-animations & {
       transition: none;
