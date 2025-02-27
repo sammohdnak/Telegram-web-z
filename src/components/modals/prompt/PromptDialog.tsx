@@ -1,13 +1,13 @@
-import React, { memo, useState } from '../../../lib/teact/teact';
+import React, { memo, useState } from "../../../lib/teact/teact";
 
-import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
+import useLastCallback from "../../../hooks/useLastCallback";
+import useOldLang from "../../../hooks/useOldLang";
 
-import Button from '../../ui/Button';
-import InputText from '../../ui/InputText';
-import Modal from '../../ui/Modal';
+import Button from "../../ui/Button";
+import InputText from "../../ui/InputText";
+import Modal from "../../ui/Modal";
 
-import styles from './PromptDialog.module.scss';
+import styles from "./PromptDialog.module.scss";
 
 export type OwnProps = {
   isOpen: boolean;
@@ -28,7 +28,7 @@ const PromptDialog = ({
   placeholder,
   submitText,
   maxLength,
-  initialValue = '',
+  initialValue = "",
   onClose,
   onSubmit,
 }: OwnProps) => {
@@ -36,9 +36,11 @@ const PromptDialog = ({
 
   const [text, setText] = useState(initialValue);
 
-  const handleTextChange = useLastCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setText(e.target.value);
-  });
+  const handleTextChange = useLastCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setText(e.target.value);
+    }
+  );
 
   const handleSubmit = useLastCallback(() => {
     onSubmit(text);
@@ -52,11 +54,7 @@ const PromptDialog = ({
       onClose={onClose}
       isSlim
     >
-      {Boolean(subtitle) && (
-        <div className={styles.subtitle}>
-          {subtitle}
-        </div>
-      )}
+      {Boolean(subtitle) && <div className={styles.subtitle}>{subtitle}</div>}
       <InputText
         placeholder={placeholder}
         value={text}
@@ -66,10 +64,10 @@ const PromptDialog = ({
       />
       <div className="dialog-buttons mt-2">
         <Button className="confirm-dialog-button" onClick={handleSubmit}>
-          {submitText || lang('Save')}
+          {submitText || lang("Save")}
         </Button>
         <Button className="confirm-dialog-button" isText onClick={onClose}>
-          {lang('Cancel')}
+          {lang("Cancel")}
         </Button>
       </div>
     </Modal>

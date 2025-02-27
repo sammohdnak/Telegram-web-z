@@ -1,6 +1,14 @@
 @use "../../../styles/mixins";
 
 .root {
+  padding: 4px;
+  position: absolute;
+  top:30px;
+  left: 0px;
+  right: 0px;
+  min-width: 360px;
+  max-width: 360px;
+  // transform: translate(0px,50px) !important;
   display: flex;
   align-items: center;
   margin-left: auto;

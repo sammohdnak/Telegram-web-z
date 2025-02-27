@@ -1,16 +1,38 @@
 // hooks/useDeckColumns.ts
+import { getGlobal } from '../../../../global';
 import { useCallback, useEffect, useState } from '../../../../lib/teact/teact';
 
-interface Deck {
+export interface Deck {
     name: string;
-    chatIds: string[];
+    chatIds: { chatId: string, topicId?: string }[];
 }
 
-const DECKS_STORAGE_KEY = 'telegram_deck_columns';
+export type UserDeckData = {
+    userId: string,
+    selectedDeck: string,
+    decks: Deck[]
+}
+
+export const initialUserDeckState: UserDeckData = {
+    userId: '1234',
+    selectedDeck: 'Deck 1',
+    decks: [{
+        name: 'Deck 1',
+        chatIds: [],
+    }]
+}
+
 
 export function useDeckColumns() {
 
-    const getInitialDeckData = () => {
+    const global = getGlobal()
+    const currentUserId = global.currentUserId || '1234'
+
+
+    let DECKS_STORAGE_KEY = `telegram_deck_columns_${currentUserId}`;
+
+
+    const getInitialUserDeckData = () => {
         try {
             const stored = localStorage.getItem(DECKS_STORAGE_KEY);
             if (stored) {
@@ -21,63 +43,95 @@ export function useDeckColumns() {
             console.error('Failed to load decks from storage', err);
         }
 
+
+        let _initialUserDeckState = initialUserDeckState
+        _initialUserDeckState.userId = global.currentUserId || '1234'
         // Default deck if nothing in storage
-        return [{
-            name: 'Deck 1',
-            chatIds: [],
-        }];
+        return { ..._initialUserDeckState };
     }
-    const [decks, setDecks] = useState<Deck[]>(getInitialDeckData());
+    const [userDeckData, setUserDeckData] = useState<UserDeckData>(getInitialUserDeckData());
 
     // Save to localStorage whenever decks change
     useEffect(() => {
         try {
-            localStorage.setItem(DECKS_STORAGE_KEY, JSON.stringify(decks));
+            localStorage.setItem(DECKS_STORAGE_KEY, JSON.stringify(userDeckData));
         } catch (err) {
             // eslint-disable-next-line no-console
             console.error('Failed to save decks to storage', err);
         }
-    }, [decks]);
+    }, [userDeckData]);
 
     const addDeck = useCallback((name: string) => {
-        setDecks((current) => [...current, { name, chatIds: [] }]);
+
+        let _userDeckData = userDeckData
+        _userDeckData.decks.push({ name, chatIds: [] })
+
+        console.log({ userDeckData, _userDeckData })
+        setUserDeckData({ ..._userDeckData })
     }, []);
 
     const removeDeck = useCallback((name: string) => {
-        setDecks((current) => current.filter((deck) => deck.name !== name));
+        let _userDeckData = userDeckData
+        _userDeckData.decks = _userDeckData.decks.filter((deck) => deck.name !== name)
+
+        setUserDeckData({ ..._userDeckData })
     }, []);
 
-    const addChatToDeck = useCallback((deckName: string, chatId: string) => {
-        setDecks((current) => current.map((deck) => {
+    const addChatToDeck = useCallback((deckName: string, chatId: string, topicId?: string) => {
+        let _userDeckData = userDeckData
+        _userDeckData.decks = _userDeckData.decks.map((deck) => {
             if (deck.name === deckName) {
                 return {
                     ...deck,
-                    chatIds: [...deck.chatIds, chatId],
+                    chatIds: [...deck.chatIds, { chatId: chatId, topicId: topicId }],
                 };
             }
             return deck;
-        }));
+        })
+
+        setUserDeckData({ ..._userDeckData })
+
+    }, []);
+
+    const renameDeck = useCallback((deckName: string, newName: string) => {
+        let _userDeckData = userDeckData
+        _userDeckData.decks = _userDeckData.decks.map((deck) => {
+            if (deck.name === deckName) {
+                return {
+                    ...deck,
+                    name: newName
+                };
+            }
+            return deck;
+        })
+
+        setUserDeckData({ ..._userDeckData })
+
     }, []);
 
     const removeChatFromDeck = useCallback((deckName: string, chatId: string) => {
+        let _userDeckData = userDeckData
 
-        console.log({ deckName, chatId })
-        setDecks((current) => current.map((deck) => {
+
+        _userDeckData.decks = _userDeckData.decks.map((deck) => {
             if (deck.name === deckName) {
                 return {
                     ...deck,
-                    chatIds: deck.chatIds.filter((id) => id !== chatId),
+                    chatIds: deck.chatIds.filter((chat) => chat.chatId !== chatId),
                 };
             }
             return deck;
-        }));
+        })
+        setUserDeckData({ ..._userDeckData })
+
     }, []);
 
     return {
-        decks,
+        userDeckData,
         addDeck,
         removeDeck,
         addChatToDeck,
         removeChatFromDeck,
+        renameDeck
     };
 }

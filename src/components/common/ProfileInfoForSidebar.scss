@@ -1,0 +1,42 @@
+// This class is used in `ghostAnimation`, so we need to keep it global
+.ProfileInfoForSidebar {
+  
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  
+
+  
+  .fullName {
+    font-weight: var(--font-weight-medium);
+    font-size: 1.25rem;
+    line-height: 1.375rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin-bottom: 0;
+  }
+
+  .VerifiedIcon,
+  .StarIcon {
+    --color-fill: var(--color-white);
+    --color-checkmark: var(--color-primary);
+
+    z-index: 2;
+    opacity: 0.8;
+  }
+
+  .emoji:not(.custom-emoji) {
+    width: 1.5rem;
+    height: 1.5rem;
+    background-size: 1.5rem;
+  }
+
+  .custom-emoji {
+    --custom-emoji-size: 1.5rem;
+
+    color: var(--color-white) !important;
+    pointer-events: auto;
+    cursor: var(--custom-cursor, pointer);
+  }
+}

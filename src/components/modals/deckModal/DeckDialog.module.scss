@@ -1,0 +1,16 @@
+.subtitle {
+  margin-bottom: 1rem;
+}
+.name-buttons{
+display: flex;
+flex-direction: row;
+gap: 8px;
+align-items: center;
+}
+
+.deck-modal-buttons{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  }

@@ -598,7 +598,7 @@ function LeftColumn({
       cleanupExceptionKey={ContentType.Main}
       shouldWrap
       wrapExceptionKey={ContentType.Main}
-      id="LeftColumn"
+      id="AddColumn"
       withSwipeControl
     >
       {renderContent}

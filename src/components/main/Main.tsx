@@ -116,6 +116,7 @@ export interface OwnProps {
 }
 
 type StateProps = {
+  currentChatId: string | undefined;
   isMasterTab?: boolean;
   currentUserId?: string;
   isLeftColumnOpen: boolean;
@@ -168,6 +169,7 @@ const CALL_BUNDLE_LOADING_DELAY_MS = 5000; // 5 sec
 let DEBUG_isLogged = false;
 
 const Main = ({
+  currentChatId,
   isMobile,
   isLeftColumnOpen,
   isMiddleColumnOpen,
@@ -265,6 +267,7 @@ const Main = ({
     loadTopBotApps,
     loadPaidReactionPrivacy,
     loadPasswordInfo,
+    focusMessage,
   } = getActions();
 
   if (DEBUG && !DEBUG_isLogged) {
@@ -405,6 +408,38 @@ const Main = ({
       });
     }
   }, [isMasterTab]);
+
+  const {
+    userDeckData,
+    selectedDeck,
+    addDeck,
+    removeDeck,
+    isAddColumnOpen,
+    setIsAddColumnOpen,
+  } = useDecks();
+
+  useEffect(() => {
+    if (!currentChatId) {
+      if (
+        userDeckData &&
+        userDeckData.decks.length &&
+        userDeckData.decks[0].chatIds.length
+      ) {
+        let chatId = userDeckData.decks[0].chatIds[0].chatId;
+        let topicId = userDeckData.decks[0].chatIds[0].topicId;
+
+        if (topicId && Number(topicId) !== -1) {
+          openThread({ chatId, threadId: topicId, shouldReplaceHistory: true });
+        } else {
+          focusMessage({
+            chatId,
+            messageId: 10000000,
+            shouldReplaceHistory: true,
+          });
+        }
+      }
+    }
+  }, [currentChatId, userDeckData]);
 
   // Sticker sets
   useEffect(() => {
@@ -587,57 +622,52 @@ const Main = ({
   useBackgroundMode(handleBlur, handleFocus, !!IS_ELECTRON);
   useBeforeUnload(handleBlur);
   usePreventPinchZoomGesture(isMediaViewerOpen || isStoryViewerOpen);
-  const {
-    decks,
-    selectedDeck,
-    addDeck,
-    removeDeck,
-    isAddColumnOpen,
-    setIsAddColumnOpen,
-  } = useDecks();
 
   return (
     <div ref={containerRef} id="Main" className={className}>
       <Sidebar deckRef={deckRef} />
 
       <div className="scrollable-deck" ref={deckRef}>
-        {decks
+        {userDeckData.decks
           .find((_deck) => _deck.name == selectedDeck)!
-          .chatIds.map((_chatId, i) => (
+          .chatIds.map((_chat, i) => (
             <MiddleColumn
               key={i}
               leftColumnRef={leftColumnRef}
               isMobile={true}
-              chatId={_chatId}
+              chatId={_chat.chatId}
+              topicId={_chat.topicId}
             />
           ))}
 
         {!isAddColumnOpen && (
           <div className="add-column-wrapper">
-            <Button
-              onClick={() => {
-                setIsAddColumnOpen(!isAddColumnOpen);
-                setTimeout(() => {
-                  deckRef.current?.scrollTo({
-                    left:
-                      decks.find((_deck) => _deck.name == selectedDeck)!.chatIds
-                        .length *
-                        360 +
-                      360, //change this to the width of each column
-                    behavior: "smooth",
-                  });
-                }, 300);
-              }}
-            >
-              Add Column
-            </Button>
+            <div>
+              <Button
+                color="gray"
+                style="display:flex; font-weight:700"
+                onClick={() => {
+                  setIsAddColumnOpen(!isAddColumnOpen);
+                  setTimeout(() => {
+                    deckRef.current?.scrollTo({
+                      left:
+                        userDeckData.decks.find(
+                          (_deck) => _deck.name == selectedDeck
+                        )!.chatIds.length *
+                          360 +
+                        360, //change this to the width of each column
+                      behavior: "smooth",
+                    });
+                  }, 300);
+                }}
+              >
+                Add Column
+              </Button>
+            </div>
           </div>
         )}
 
         {isAddColumnOpen && <AddColumn ref={leftColumnRef} />}
-
-        {/* <MiddleColumn leftColumnRef={leftColumnRef} isMobile={isMobile} />
-        <MiddleColumn leftColumnRef={leftColumnRef} isMobile={isMobile} /> */}
       </div>
       <RightColumn isMobile={isMobile} />
       <MediaViewer isOpen={isMediaViewerOpen} />
@@ -748,6 +778,7 @@ export default memo(
     return {
       currentUserId,
       isLeftColumnOpen: isLeftColumnShown,
+      currentChatId: chatId,
       isMiddleColumnOpen: Boolean(chatId),
       isRightColumnOpen: selectIsRightColumnShown(global, isMobile),
       isMediaViewerOpen: selectIsMediaViewerOpen(global),

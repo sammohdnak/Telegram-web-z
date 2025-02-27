@@ -652,23 +652,23 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
               Delete Column
             </MenuItem>
           </>
-          {canLeave && (
+          {/* {canLeave && (
             <>
               <MenuSeparator />
               <MenuItem destructive icon="delete" onClick={handleDelete}>
                 {deleteTitle}
               </MenuItem>
             </>
-          )}
+          )} */}
         </Menu>
-        {chat && (
+        {/* {chat && (
           <DeleteChatModal
             isOpen={isDeleteModalOpen}
             onClose={closeDeleteModal}
             chat={savedDialog || chat}
             isSavedDialog={Boolean(savedDialog)}
           />
-        )}
+        )} */}
         {canMute && shouldRenderMuteModal && chat?.id && (
           <MuteChatModal
             isOpen={isMuteModalOpen}

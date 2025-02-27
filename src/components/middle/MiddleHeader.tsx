@@ -356,17 +356,19 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
       >
         {renderInfo()}
       </Transition>
-      {/* {!isPinnedMessagesFullWidth && (
-        <HeaderPinnedMessage
-          key={chatId}
-          chatId={chatId}
-          threadId={threadId}
-          messageListType={messageListType}
-          onFocusPinnedMessage={onFocusPinnedMessage}
-          getLoadingPinnedId={getLoadingPinnedId}
-          getCurrentPinnedIndex={getCurrentPinnedIndex}
-        />
-      )} */}
+      <div className="pinned-messages-middle">
+        {!isPinnedMessagesFullWidth && (
+          <HeaderPinnedMessage
+            key={chatId}
+            chatId={chatId}
+            threadId={threadId}
+            messageListType={messageListType}
+            onFocusPinnedMessage={onFocusPinnedMessage}
+            getLoadingPinnedId={getLoadingPinnedId}
+            getCurrentPinnedIndex={getCurrentPinnedIndex}
+          />
+        )}
+      </div>
 
       <div className="header-tools">
         {isAudioPlayerRendering && <AudioPlayer />}
@@ -432,6 +434,7 @@ export default memo(
         typingStatus,
         isLeftColumnShown,
         isRightColumnShown: selectIsRightColumnShown(global, isMobile),
+
         isSelectModeActive: selectIsInSelectMode(global),
         audioMessage,
         chat,

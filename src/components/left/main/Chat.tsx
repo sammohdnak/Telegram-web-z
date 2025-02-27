@@ -225,10 +225,26 @@ const Chat: FC<OwnProps & StateProps> = ({
 
   const { addChatToDeck, selectedDeck } = useDecks();
   const handleClick = useLastCallback(() => {
-    addChatToDeck(selectedDeck, chat?.id!);
+    const noForumTopicPanel = isMobile && isForumAsMessages;
+
+    if (isForum) {
+      if (isForumPanelOpen) {
+        closeForumPanel(undefined, { forceOnHeavyAnimation: true });
+
+        return;
+      } else {
+        if (!noForumTopicPanel) {
+          openForumPanel({ chatId }, { forceOnHeavyAnimation: true });
+          true;
+        }
+
+        if (!isForumAsMessages) return;
+      }
+    } else {
+      addChatToDeck(selectedDeck, chat?.id!);
+    }
 
     return;
-    const noForumTopicPanel = isMobile && isForumAsMessages;
 
     if (isMobile) {
       setShouldCloseRightColumn({ value: true });
@@ -252,20 +268,6 @@ const Chat: FC<OwnProps & StateProps> = ({
         toggleChatInfo({ force: false });
       }
       return;
-    }
-
-    if (isForum) {
-      if (isForumPanelOpen) {
-        closeForumPanel(undefined, { forceOnHeavyAnimation: true });
-
-        return;
-      } else {
-        if (!noForumTopicPanel) {
-          openForumPanel({ chatId }, { forceOnHeavyAnimation: true });
-        }
-
-        if (!isForumAsMessages) return;
-      }
     }
 
     openChat(

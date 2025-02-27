@@ -286,19 +286,25 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     <div className="LeftMainHeader">
       <div id="LeftMainHeader" className="left-header" ref={headerRef}>
         {oldLang.isRtl && <div className="DropdownMenuFiller" />}
-        {/* <DropdownMenu
+        <DropdownMenu
           trigger={MainButton}
           footer={`${APP_NAME} ${versionString}`}
           className={buildClassName(
-            'main-menu',
-            oldLang.isRtl && 'rtl',
-            shouldHideSearch && oldLang.isRtl && 'right-aligned',
-            shouldDisableDropdownMenuTransitionRef.current && oldLang.isRtl && 'disable-transition',
+            "main-menu",
+            oldLang.isRtl && "rtl",
+            shouldHideSearch && oldLang.isRtl && "right-aligned",
+            shouldDisableDropdownMenuTransitionRef.current &&
+              oldLang.isRtl &&
+              "disable-transition"
           )}
           forceOpen={isBotMenuOpen}
-          positionX={shouldHideSearch && oldLang.isRtl ? 'right' : 'left'}
-          transformOriginX={IS_ELECTRON && IS_MAC_OS && !isFullscreen ? 90 : undefined}
-          onTransitionEnd={oldLang.isRtl ? handleDropdownMenuTransitionEnd : undefined}
+          positionX={shouldHideSearch && oldLang.isRtl ? "right" : "left"}
+          transformOriginX={
+            IS_ELECTRON && IS_MAC_OS && !isFullscreen ? 90 : undefined
+          }
+          onTransitionEnd={
+            oldLang.isRtl ? handleDropdownMenuTransitionEnd : undefined
+          }
         >
           <LeftSideMenuItems
             onSelectArchived={onSelectArchived}
@@ -307,20 +313,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
             onBotMenuOpened={markBotMenuOpen}
             onBotMenuClosed={unmarkBotMenuOpen}
           />
-        </DropdownMenu> */}
-        <Button
-          round
-          size="smaller"
-          color="translucent"
-          onClick={() => {
-            setIsAddColumnOpen(!isAddColumnOpen);
-          }}
-          ariaLabel={"Close"}
-        >
-          <div
-            className={buildClassName("animated-close-icon", "state-back")}
-          />
-        </Button>
+        </DropdownMenu>
 
         <SearchInput
           inputId="telegram-search-input"
@@ -382,6 +375,18 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
             onClick={toggleConnectionStatus}
           />
         </ShowTransition>
+
+        <Button
+          round
+          size="smaller"
+          color="translucent"
+          onClick={() => {
+            setIsAddColumnOpen(!isAddColumnOpen);
+          }}
+          ariaLabel={"Close"}
+        >
+          <Icon name="close" />
+        </Button>
       </div>
     </div>
   );

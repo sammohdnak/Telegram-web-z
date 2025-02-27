@@ -177,7 +177,7 @@
 }
 
 // Used by Avatar and ProfilePhoto components
-.Avatar, .ProfilePhoto {
+.Avatar, .ProfilePhoto, .ProfilePhotoForSidebar {
   --color-user: var(--accent-color);
 
   &.replies-bot-account,

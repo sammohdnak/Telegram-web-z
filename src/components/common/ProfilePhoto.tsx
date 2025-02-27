@@ -1,9 +1,7 @@
-import type { FC, TeactNode } from '../../lib/teact/teact';
-import React, {
-  memo, useEffect, useMemo, useRef,
-} from '../../lib/teact/teact';
+import type { FC, TeactNode } from "../../lib/teact/teact";
+import React, { memo, useEffect, useMemo, useRef } from "../../lib/teact/teact";
 
-import type { ApiChat, ApiPhoto, ApiUser } from '../../api/types';
+import type { ApiChat, ApiPhoto, ApiUser } from "../../api/types";
 
 import {
   getChatAvatarHash,
@@ -16,25 +14,25 @@ import {
   isChatWithRepliesBot,
   isDeletedUser,
   isUserId,
-} from '../../global/helpers';
-import buildClassName from '../../util/buildClassName';
-import { getFirstLetters } from '../../util/textFormat';
-import { IS_CANVAS_FILTER_SUPPORTED } from '../../util/windowEnvironment';
-import { getPeerColorClass } from './helpers/peerColor';
-import renderText from './helpers/renderText';
+} from "../../global/helpers";
+import buildClassName from "../../util/buildClassName";
+import { getFirstLetters } from "../../util/textFormat";
+import { IS_CANVAS_FILTER_SUPPORTED } from "../../util/windowEnvironment";
+import { getPeerColorClass } from "./helpers/peerColor";
+import renderText from "./helpers/renderText";
 
-import useAppLayout from '../../hooks/useAppLayout';
-import useCanvasBlur from '../../hooks/useCanvasBlur';
-import useFlag from '../../hooks/useFlag';
-import useMedia from '../../hooks/useMedia';
-import useMediaTransitionDeprecated from '../../hooks/useMediaTransitionDeprecated';
-import useOldLang from '../../hooks/useOldLang';
+import useAppLayout from "../../hooks/useAppLayout";
+import useCanvasBlur from "../../hooks/useCanvasBlur";
+import useFlag from "../../hooks/useFlag";
+import useMedia from "../../hooks/useMedia";
+import useMediaTransitionDeprecated from "../../hooks/useMediaTransitionDeprecated";
+import useOldLang from "../../hooks/useOldLang";
 
-import OptimizedVideo from '../ui/OptimizedVideo';
-import Spinner from '../ui/Spinner';
-import Icon from './icons/Icon';
+import OptimizedVideo from "../ui/OptimizedVideo";
+import Spinner from "../ui/Spinner";
+import Icon from "./icons/Icon";
 
-import './ProfilePhoto.scss';
+import "./ProfilePhotoForSidebar.scss";
 
 type OwnProps = {
   chat?: ApiChat;
@@ -65,27 +63,46 @@ const ProfilePhoto: FC<OwnProps> = ({
   const isRepliesChat = chat && isChatWithRepliesBot(chat.id);
   const isAnonymousForwards = chat && isAnonymousForwardsChat(chat.id);
   const peer = (user || chat)!;
-  const canHaveMedia = peer && !isSavedMessages && !isDeleted && !isRepliesChat && !isAnonymousForwards;
+  const canHaveMedia =
+    peer &&
+    !isSavedMessages &&
+    !isDeleted &&
+    !isRepliesChat &&
+    !isAnonymousForwards;
   const { isVideo } = photo || {};
 
-  const avatarHash = (!photo || photo.id === peer.avatarPhotoId) && getChatAvatarHash(peer, 'normal');
+  const avatarHash =
+    (!photo || photo.id === peer.avatarPhotoId) &&
+    getChatAvatarHash(peer, "normal");
 
-  const previewHash = canHaveMedia && photo && !avatarHash && getPhotoMediaHash(photo, 'pictogram');
+  const previewHash =
+    canHaveMedia &&
+    photo &&
+    !avatarHash &&
+    getPhotoMediaHash(photo, "pictogram");
   const previewBlobUrl = useMedia(previewHash || avatarHash);
 
-  const photoHash = canHaveMedia && photo && !isVideo && getProfilePhotoMediaHash(photo);
+  const photoHash =
+    canHaveMedia && photo && !isVideo && getProfilePhotoMediaHash(photo);
   const photoBlobUrl = useMedia(photoHash);
 
-  const videoHash = canHaveMedia && photo && isVideo && getVideoProfilePhotoMediaHash(photo);
+  const videoHash =
+    canHaveMedia && photo && isVideo && getVideoProfilePhotoMediaHash(photo);
   const videoBlobUrl = useMedia(videoHash);
 
   const fullMediaData = videoBlobUrl || photoBlobUrl;
   const [isVideoReady, markVideoReady] = useFlag();
   const isFullMediaReady = Boolean(fullMediaData && (!isVideo || isVideoReady));
   const transitionClassNames = useMediaTransitionDeprecated(isFullMediaReady);
-  const isBlurredThumb = canHaveMedia && !isFullMediaReady && !previewBlobUrl && photo?.thumbnail?.dataUri;
+  const isBlurredThumb =
+    canHaveMedia &&
+    !isFullMediaReady &&
+    !previewBlobUrl &&
+    photo?.thumbnail?.dataUri;
   const blurredThumbCanvasRef = useCanvasBlur(
-    photo?.thumbnail?.dataUri, !isBlurredThumb, isMobile && !IS_CANVAS_FILTER_SUPPORTED,
+    photo?.thumbnail?.dataUri,
+    !isBlurredThumb,
+    isMobile && !IS_CANVAS_FILTER_SUPPORTED
   );
   const hasMedia = photo || previewBlobUrl || isBlurredThumb;
 
@@ -97,23 +114,29 @@ const ProfilePhoto: FC<OwnProps> = ({
 
   const specialIcon = useMemo(() => {
     if (isSavedMessages) {
-      return isSavedDialog ? 'my-notes' : 'avatar-saved-messages';
+      return isSavedDialog ? "my-notes" : "avatar-saved-messages";
     }
 
     if (isDeleted) {
-      return 'avatar-deleted-account';
+      return "avatar-deleted-account";
     }
 
     if (isRepliesChat) {
-      return 'reply-filled';
+      return "reply-filled";
     }
 
     if (isAnonymousForwards) {
-      return 'author-hidden';
+      return "author-hidden";
     }
 
     return undefined;
-  }, [isAnonymousForwards, isDeleted, isSavedDialog, isRepliesChat, isSavedMessages]);
+  }, [
+    isAnonymousForwards,
+    isDeleted,
+    isSavedDialog,
+    isRepliesChat,
+    isSavedMessages,
+  ]);
 
   let content: TeactNode | undefined;
 
@@ -125,15 +148,20 @@ const ProfilePhoto: FC<OwnProps> = ({
         {isBlurredThumb ? (
           <canvas ref={blurredThumbCanvasRef} className="thumb" />
         ) : (
-          <img src={previewBlobUrl} draggable={false} className="thumb" alt="" />
+          <img
+            src={previewBlobUrl}
+            draggable={false}
+            className="thumb"
+            alt=""
+          />
         )}
-        {photo && (
-          isVideo ? (
+        {photo &&
+          (isVideo ? (
             <OptimizedVideo
               canPlay={canPlayVideo}
               ref={videoRef}
               src={fullMediaData}
-              className={buildClassName('avatar-media', transitionClassNames)}
+              className={buildClassName("avatar-media", transitionClassNames)}
               muted
               disablePictureInPicture
               loop
@@ -143,11 +171,10 @@ const ProfilePhoto: FC<OwnProps> = ({
           ) : (
             <img
               src={fullMediaData}
-              className={buildClassName('avatar-media', transitionClassNames)}
+              className={buildClassName("avatar-media", transitionClassNames)}
               alt=""
             />
-          )
-        )}
+          ))}
       </>
     );
   } else if (user) {
@@ -165,18 +192,20 @@ const ProfilePhoto: FC<OwnProps> = ({
   }
 
   const fullClassName = buildClassName(
-    'ProfilePhoto',
+    "ProfilePhoto",
     getPeerColorClass(peer),
-    isSavedMessages && 'saved-messages',
-    isAnonymousForwards && 'anonymous-forwards',
-    isDeleted && 'deleted-account',
-    isRepliesChat && 'replies-bot-account',
-    (!isSavedMessages && !hasMedia) && 'no-photo',
+    isSavedMessages && "saved-messages",
+    isAnonymousForwards && "anonymous-forwards",
+    isDeleted && "deleted-account",
+    isRepliesChat && "replies-bot-account",
+    !isSavedMessages && !hasMedia && "no-photo"
   );
 
   return (
     <div className={fullClassName} onClick={hasMedia ? onClick : undefined}>
-      {typeof content === 'string' ? renderText(content, ['hq_emoji']) : content}
+      {typeof content === "string"
+        ? renderText(content, ["hq_emoji"])
+        : content}
     </div>
   );
 };

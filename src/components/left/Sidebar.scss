@@ -1,5 +1,89 @@
 .sidebar{
     border-right: 1px solid var(--color-borders);
     border-left: 1px solid var(--color-borders);
+    display:flex;
+    flex-direction: column;
+    gap: 16px;
+    
+    position: relative;
 
+}
+
+.decks-column{
+    padding-left: 16px;
+    padding-right: 16px;
+   
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+   
+}
+.deck-title{
+    padding-top: 16px;
+    padding-left: 16px;
+    padding-right: 16px;
+    border-top: 1px solid var(--color-borders);
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap:10px;
+    align-items: center;
+}
+.deck-row{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap:10px;
+    align-items: center;
+    
+}
+.profile-info-sidebar{
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-top: 16px;
+   
+}
+.sidebar-footer{
+    padding-left: 16px;
+    padding-right: 16px;
+   
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    align-content: center;
+    padding: 4px;
+}
+
+.deck-button{
+   
+   
+    --custom-emoji-size: 1.25rem;
+    --reaction-background: var(--color-reaction);
+    --reaction-background-hover: var(--hover-color-reaction);
+    --reaction-text-color: var(--text-color-reaction);
+        height: 1.875rem;
+        white-space: nowrap;
+        width: auto;
+        padding: 0 0.375rem 0 0.25rem;
+        background-color: var(--reaction-background) !important;
+        border-radius: 1.75rem;
+        font-weight: var(--font-weight-medium);
+        font-variant-numeric: tabular-nums;
+        text-transform: none;
+        color: var(--reaction-text-color);
+        overflow: visible;
+        position: relative;
+        line-height: 1.75rem;
+        z-index: 1;
+        gap: 0.125rem;
+        transition: background-color 150ms, color 150ms, filter 150ms, -webkit-backdrop-filter 150ms !important;
+        transition: background-color 150ms, color 150ms, backdrop-filter 150ms, filter 150ms !important;
+        transition: background-color 150ms, color 150ms, backdrop-filter 150ms, filter 150ms, -webkit-backdrop-filter 150ms !important;
+    
+    
 }

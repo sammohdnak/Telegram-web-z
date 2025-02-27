@@ -113,6 +113,7 @@ import styles from "./MiddleColumn.module.scss";
 
 interface OwnProps {
   chatId: string;
+  topicId?: string;
   leftColumnRef: React.RefObject<HTMLDivElement>;
   isMobile?: boolean;
 }
@@ -253,16 +254,20 @@ function MiddleColumn({
   const { isTablet, isDesktop } = useAppLayout();
 
   //TODO . Review Below code. This is where we set the chatid when we click each colums
-  const { focusMessage } = getActions();
+  const { focusMessage, openThread } = getActions();
   const handleClick = useLastCallback(() => {
-    focusMessage({
-      chatId,
-      messageId:
-        (chat?.unreadMentions && chat.unreadMentions[0]) ||
-        chat?.lastReadInboxMessageId ||
-        0,
-      shouldReplaceHistory: true,
-    });
+    if (threadId && threadId !== -1) {
+      openThread({ chatId, threadId: threadId, shouldReplaceHistory: true });
+    } else {
+      focusMessage({
+        chatId,
+        messageId:
+          (chat?.unreadMentions && chat.unreadMentions[0]) ||
+          chat?.lastReadInboxMessageId ||
+          0,
+        shouldReplaceHistory: true,
+      });
+    }
   });
 
   const lang = useOldLang();
@@ -872,7 +877,9 @@ function MiddleColumn({
 }
 
 export default memo(
-  withGlobal<OwnProps>((global, { isMobile, chatId }): StateProps => {
+  withGlobal<OwnProps>((global, { isMobile, chatId, topicId }): StateProps => {
+    const { chatId: globalChatId } = selectCurrentMessageList(global) || {};
+
     const theme = selectTheme(global);
     const {
       isBlurred: isBackgroundBlurred,
@@ -901,9 +908,11 @@ export default memo(
       patternColor,
       isLeftColumnShown,
       isRightColumnShown: selectIsRightColumnShown(global, isMobile),
+
       isBackgroundBlurred,
       hasActiveMiddleSearch: Boolean(selectCurrentMiddleSearch(global)),
-      isSelectModeActive: selectIsInSelectMode(global),
+      isSelectModeActive:
+        selectIsInSelectMode(global) && globalChatId == chatId,
       isSeenByModalOpen: Boolean(seenByModal),
       isPrivacySettingsNoticeModalOpen: Boolean(privacySettingsNoticeModal),
       isReactorListModalOpen: Boolean(reactorModal),
@@ -918,7 +927,10 @@ export default memo(
       return state;
     }
 
-    const { threadId, type: messageListType } = currentMessageList;
+    const { type: messageListType } = currentMessageList;
+    const threadId = topicId || (-1 as ThreadId);
+
+    // console.log({ threadId, currentMessageList }, "threadId");
 
     const isPrivate = isUserId(chatId);
     const chat = selectChat(global, chatId);

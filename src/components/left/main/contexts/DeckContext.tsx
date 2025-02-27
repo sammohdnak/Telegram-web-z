@@ -2,19 +2,16 @@
 import useContext from "../../../../hooks/data/useContext";
 import type { FC, TeactNode } from "../../../../lib/teact/teact";
 import React, { createContext, useState } from "../../../../lib/teact/teact";
-import { useDeckColumns } from "../hooks/useDeckColumns";
-
-export interface Deck {
-  name: string;
-  chatIds: string[];
-}
+import { useDeckColumns, UserDeckData } from "../hooks/useDeckColumns";
 
 export interface DeckContextType {
-  decks: Deck[];
+  userDeckData: UserDeckData;
   addDeck: (name: string) => void;
   removeDeck: (name: string) => void;
-  addChatToDeck: (deckName: string, chatId: string) => void;
+  addChatToDeck: (deckName: string, chatId: string, topicId?: string) => void;
   removeChatFromDeck: (deckName: string, chatId: string) => void;
+  renameDeck: (deckName: string, newName: string) => void;
+
   selectedDeck: string;
   setSelectedDeck: (deckName: string) => void;
   isAddColumnOpen: boolean;
@@ -23,10 +20,20 @@ export interface DeckContextType {
 
 // Initialize with default values
 const defaultContext: DeckContextType = {
-  decks: [],
+  userDeckData: {
+    userId: "1234",
+    selectedDeck: "Deck 1",
+    decks: [
+      {
+        name: "Deck 1",
+        chatIds: [],
+      },
+    ],
+  },
   addDeck: () => {},
   removeDeck: () => {},
   addChatToDeck: () => {},
+  renameDeck: () => {},
   removeChatFromDeck: () => {},
   selectedDeck: "Deck 1",
   setSelectedDeck: () => {},
@@ -37,9 +44,11 @@ const defaultContext: DeckContextType = {
 const DeckContext = createContext<DeckContextType>(defaultContext);
 
 export const DeckProvider: FC<{ children: TeactNode }> = ({ children }) => {
-  const deckState = useDeckColumns();
+  const userDeckState = useDeckColumns();
   const [selectedDeck, setSelectedDeck] = useState<string>(
-    deckState.decks.length > 0 ? deckState.decks[0].name : ""
+    userDeckState.userDeckData.decks.length > 0
+      ? userDeckState.userDeckData.decks[0].name
+      : ""
   );
 
   const [isAddColumnOpen, setIsAddColumnOpen] = useState<boolean>(false);
@@ -47,7 +56,7 @@ export const DeckProvider: FC<{ children: TeactNode }> = ({ children }) => {
   return (
     <DeckContext.Provider
       value={{
-        ...deckState,
+        ...userDeckState,
         selectedDeck,
         setSelectedDeck,
         isAddColumnOpen,
